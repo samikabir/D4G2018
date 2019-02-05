@@ -4,3 +4,20 @@ Challenge of eco-design focused on designing sustainable solutions for everyday 
 
 The task was to develop a web application for online survey consisting of 88 questions.The survey was designed to assess the maturity of companies in France in terms of setting up eco-design digital services. An ultimate objective was to minimize the energy consumption and carbon footprint of the application without hampering user experience.
 
+# Built With
+HTML
+CSS
+Python 2.7
+Java Script
+Flask 1.0.2
+MongoDB 3.2.11
+
+# Description
+The solution to the design challenge is composed of one html page with a survey, which content is provided by the challenge organizators. A user is given an opportunity to save answers and share the questionnaire using a generated link.
+
+# Authors
+Anastasiia Grishina,
+Feruzjon Muyassarov,
+Krishna Teja Vaddepalli,
+Maliha Rahman Mishi,
+Sami Kabir
