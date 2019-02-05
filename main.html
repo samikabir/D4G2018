@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Design4Green</title>
+		<style type="text/css">
+			.heading-maliha {
+			font-size: 34px;
+			}
+			.space-maliha
+			{
+			border-color: #FFFFFF;
+				color: #000;
+				background-color: #FFFFFF;
+				width: 100%;
+				height: 100px;
+				font-family: Comic Sans MS;
+				font-size: 15px;
+				text-align: left;
+				margin-left: auto;
+				margin-right: auto;
+				width: 80%;
+			}
+			.question-maliha
+			{
+			border-color: #ddd;
+			color: #333;
+			background-color: #b3d9ff;
+			width: 80%;
+			height: 40px;
+			font-family: Comic Sans MS;
+			font-size: 20px;
+			margin-left: auto;
+			margin-right: auto;
+			border-radius: 7px;
+			border-style: ridge;
+			}
+			.answer-maliha
+			{
+			border-color: #ddd;
+			color: #333;
+			background-color: #EFE6E6;
+			width: 80%;
+			height: 200px;
+			font-family: Comic Sans MS;
+			font-size: 20px;
+			margin-left: auto;
+			margin-right: auto;
+			border-style: ridge;
+			border-radius: 7px;
+			}
+			.welcome-maliha
+			{
+			color: #333;
+			background-color: #FFFFFF;
+			width: 80%;
+			height: 90px;
+			font-family: Comic Sans MS;
+			font-size: 20px;
+			margin-left: auto;
+			margin-right: auto;
+			text-align: center;
+			}
+			.btn-group button {
+			display: inline-block;
+			padding: 15px 25px;
+			font-size: 20px;
+			cursor: pointer;
+			text-align: center;
+			text-decoration: none;
+			outline: none;
+			color: #fff;
+			background-color: #4CAF50;
+			border: none;
+			border-radius: 15px;
+			box-shadow: 0 9px #999;
+			}
+			.btn-group button:active {
+			background-color: #3e8e41;
+			box-shadow: 0 5px #666;
+			transform: translateY(4px);
+			} 
+			.btn1 button {
+			position:absolute;
+			transition: .5s ease;
+			left: 155px;
+			top: 600px;
+			}
+			.btn2 button {
+			position:absolute;
+			transition: .5s ease;
+			left: 1290px;
+			top: 600px;
+			}
+			.btn3 button {
+			position:absolute;
+			transition: .5s ease;
+			left: 705px;
+			top: 600px;
+			}   	
+		</style>
+	</head>
+	<body>
+		<div class="heading-maliha" align="center">
+			Team 16 Green Coders
+		</div>
+		<br>
+		<div class="space-maliha" id="welcome">
+			With the support of ADEME, the Ministry of Ecology, Energy and the Sea and the Ministry of
+			Economy and Finance, the association AGIT (Alliance for Green IT) and the eco-organizations of the recycling network of Waste Electrical
+			and Electronic Equipment (WEEE) organize a survey to assess the deposits of computer and office equipment present in companies and more
+			generally on the maturity of companies in France in the use of eco-responsible digital services.
+			The duration of the questionnaire is estimated at 15 minutes if you are able to answer questions directly.
+			You can return at any time on the questionnaire, answer in several times, your previous answers are recorded. In case of modification,
+			only the last answer will be taken into account.
+			You can submit this questionnaire to several people in your organization. All you have to do is simply share the link to the questionnaire.<br>
+		</div>
+		<br>
+		<br>
+		<div class="question-maliha">
+			<div>
+				<span id = 'qNumber'></span>
+				<span id = 'question'></span>
+			</div>
+		</div>
+		<div class = "answer-maliha">
+			<div id = "answer">
+			</div>
+		</div>
+		<div class="btn-group" id="saveButton">
+			<div class="btn1">
+			<button id = 'pause'>Pause</button></div>
+			<div class="btn2" hidden>
+			<button id = 'save'>Save</button></div>
+			<div class="btn3">
+			<button id = 'next'>Next</button></div>
+			<div class="btn4">
+			<button id = 'generate'>Generate</button></div>
+		</div>
+		<div class="btn2" id="sendButton">
+		</div>
+	</body>
+	<script>
+		var questions = [];
+		var answers = [];
+		var qNumber = [];
+		var qType = [];
+		window.onload = function(){
+			var cookie = [];
+			for(var i = 0; i < 88; i++){
+				cookie[i] = "0";
+			}
+			createCookie('greenCoders',cookie,10);
+			var xhr = new XMLHttpRequest();
+			var url = "getAllBasicQuestions";
+			xhr.open("POST", url);
+			xhr.setRequestHeader("Content-Type", "application/json");
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState === 4 && xhr.status === 200) {
+					var json = JSON.parse(xhr.responseText);
+					console.log(json.result);
+					dealWithData(json.result);
+				}
+			};
+			var data = JSON.stringify({});
+			xhr.send(data);
+			var url = new URL(window.location.href);
+			var c = url.searchParams.get("continue");
+			if(c != null){
+				continuation(c);
+			}
+		}
+		function continuation(id){
+			var xhra = new XMLHttpRequest();
+			var url = "continue";
+			xhra.open("POST", url);
+			xhra.setRequestHeader("Content-Type", "application/json");
+			xhra.onreadystatechange = function () {
+				if (xhra.readyState === 4 && xhra.status === 200) {
+					var json = JSON.parse(xhra.responseText);
+					savePreviousAnswer(json);
+				}
+			};
+			var data = JSON.stringify({'id':id});
+			xhra.send(data);
+		}
+		function savePreviousAnswer(json){
+			answered=json['data'];
+			var newCookie;
+			var question;
+			var answer;
+			var arr = [];
+			for(var i=1;i<89;++i){
+				question="question"+i;
+				arr.push(answered[question]);
+			}
+			createCookie('greenCoders', arr, 10);
+			getNextQuestion(0);
+		}
+		document.getElementById('next').onclick = function() {
+			saveCurrentAnswer();
+			getNextQuestion(parseInt(document.getElementById("qNumber").innerHTML));
+		};
+		document.getElementById('save').onclick = function() {
+			var resultData = readCookie('greenCoders');
+			console.log(resultData); 
+			var xhr = new XMLHttpRequest();
+			var url = "saveAllAnswers";
+			xhr.open("POST", url, true);
+			xhr.setRequestHeader("Content-Type", "application/json");
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState === 4 && xhr.status === 200) {
+					var json = JSON.parse(xhr.responseText);
+					alert(json.status);
+				}
+			};
+			var data = JSON.stringify({"answers":resultData});
+			xhr.send(data);
+		};
+		document.getElementById('generate').onclick = function() {
+			var xhr = new XMLHttpRequest();
+			var url = "generate";
+			xhr.open("POST", url, true);
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState === 4 && xhr.status === 200) {
+					var blob=new Blob([xhr.responseText]);
+					var link=document.createElement('a');
+					link.href=window.URL.createObjectURL(blob);
+					link.download="abc.csv";
+					link.click();
+				}
+			};
+			var data = JSON.stringify({});
+			xhr.send(data);
+		};
+
+		
+		function saveCurrentAnswer(){
+			var number = document.getElementById("qNumber").innerHTML;
+			var output = getCurrentAnswer(number);
+			if(output!='saved'){
+				savingCurrentAns(number, output);
+			}
+		};
+		function savingCurrentAns(number, output){       
+			var currentCookie = readCookie('greenCoders');
+			if(currentCookie != ""){
+				cookieData = currentCookie.split(",");
+				cookieData[number-1] = output;
+				createCookie('greenCoders', cookieData, 10);
+			}else{
+				alert("Cookie not found");
+			}
+		};
+		function createCookie(name, value, days) {
+			var expires;
+			if (days) {
+				var date = new Date();
+				date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+				expires = "; expires=" + date.toGMTString();
+			}else{
+				expires = "";
+			}
+			document.cookie = encodeURIComponent(name) + "=" + encodeURIComponent(value) + expires + "; path=/";
+		};
+		function readCookie(name) {
+			var nameEQ = encodeURIComponent(name) + "=";
+			var ca = document.cookie.split(';');
+			for (var i = 0; i < ca.length; i++) {
+				var c = ca[i];
+				while (c.charAt(0) === ' ')
+					c = c.substring(1, c.length);
+				if (c.indexOf(nameEQ) === 0)
+					return decodeURIComponent(c.substring(nameEQ.length, c.length));
+			}
+			return null;
+		}
+		function eraseCookie(name) {
+			createCookie(name, "", -1);
+		}
+		var mainQ   = [18, 31, 50, 63, 78];
+		var subQ  = [31, 39, 62, 70, 83]; 
+		function getCurrentAnswer(number){
+			num = number;
+			var out = '';
+			if (mainQ.indexOf(number) != -1){
+				for (var i = number+1; i < subQ[mainQ.indexOf(number)]; i++){
+					out = document.querySelector('input[name="radio'+i+'"]:checked').value;
+					savingCurrentAns(i, out);
+				}
+				return 'saved';
+			}else if(number == 42){
+				var selected = document.querySelector('input[name="radio42"]:checked').value;
+				if(selected == "inpercent" || selected == "inquantity"){
+					selected = selected + "#" + document.getElementById('text42').value;
+				}
+				out = selected;
+			} 
+			else if(qType[num] == "single"){
+				out = document.querySelector('input[name="radio'+number+'"]:checked').value;    
+				out = out.replace(/,/g,"#");
+			}else if(qType[num] == "text"){
+				out = document.getElementById("text"+number).value;
+				out = out.replace(/,/g ,"#");
+			}else if(qType[num] == "single#text"){
+				if(document.getElementById("text"+number).value == ""){
+					out = document.querySelector('input[name="radio'+number+'"]:checked').value;
+				}else{
+					out = document.getElementById("text"+number).value;
+				}
+				out = out.replace(/,/g,"#");
+			}else if(qType[num] == "yni"){
+				out = document.querySelector('input[name="radio'+number+'"]:checked').value;
+				out = out.replace(/,/g,"#");
+			}
+			return out;
+		}
+		function getNextQuestion(queNum){
+			var output = '';
+			var checkAns = readCookie('greenCoders');
+			var ans = checkAns.split(",");
+			if(queNum > 1){
+				output = getCurrentAnswer(queNum);
+				document.getElementById('welcome').innerHTML = "";
+			}
+			var nextQueIndex = queNum + 1;
+			if(nextQueIndex>88) {
+				document.getElementById('welcome').innerHTML('Thank you for participating in this survey. ' +
+				'Your answer is invaluable to us to constitute the most representative sample of the ' +
+				'companies in France.\n');
+			}
+			if(nextQueIndex==88) {
+				document.getElementById('send').removeAttribute("hidden");
+				var pauseBtn = document.getElementById('pause');
+				pauseBtn.style.display = "none";
+				var nextBtn = document.getElementById('next');
+				nextBtn.style.display = "none";
+			}
+			var typeQ = ['yes', 'yes', 'yes', 'used', 'used', 'yes'];
+			if (mainQ.indexOf(queNum) != -1){
+				nextQueIndex = subQ[mainQ.indexOf(queNum)];
+			} 
+			if (queNum == 4 && output == "Yes"){
+				nextQueIndex = 5;
+			} else if(queNum == 4 && output == "No"){
+				nextQueIndex = 11;
+			}
+			if (queNum == 12 && output == "We have (at least) a centralized physical server"){
+				nextQueIndex = 13;
+			} else if (queNum == 12 && output == "We work with workstation (s)# without centralized physical server"){
+				nextQueIndex = 44;
+			}
+			if (queNum == 13 && output == "A closet or a room without any specific system"){
+				nextQueIndex = 31;
+			} else if (queNum == 13 && output == "A dedicated room"){
+				nextQueIndex = 14
+			}
+			if (queNum == 31){
+				var answerThirteen = readCookie('greenCoders').split(',')[13];
+				if (answerThirteen == "A closet or a room without any specific system"){
+					nextQueIndex = 39;  
+				}else if (answerThirteen == "A dedicated room"){
+					nextQueIndex = 44;
+				} 
+			}
+			if (queNum == 39 && (output == "No" || output == "I do not want to answer")){
+				nextQueIndex = 42;
+			} else if (queNum == 39 && output == "Yes"){
+				nextQueIndex = 40;
+			}
+			if (queNum == 41){
+				nextQueIndex = 44;
+			}
+			if (queNum == 49){
+				var answerTwelve = readCookie('greenCoders').split(',')[12];
+				if (answerTwelve == "We have (at least) a centralized physical server"){
+					nextQueIndex = 70;
+				} else if (answerTwelve == "We work with workstation (s), without centralized physical server"){
+					nextQueIndex = 50;
+				}
+			}
+			if (queNum == 62 && output == "Yes"){
+				nextQueIndex = 63;
+			} else if (queNum == 62 && output == "No"){
+				nextQueIndex = 70;
+			}
+			if(nextQueIndex == 42){
+				document.getElementById("qNumber").innerHTML = (qNumber[nextQueIndex]);
+				document.getElementById("question").innerHTML = (questions[nextQueIndex]);
+				var op = "<label><input type = 'radio' name = 'radio42' value = 'inpercent'>In %<br></label>";
+				op = op+"<input type = 'text' name = 'text42' ><br>";
+				op = op+"<label><input type = 'radio' name = 'radio42' value = 'inquantity'>In quantity<br></label>";
+				op = op+"<input type = 'text' name = 'text42' ><br>";
+				op = op+"<label><input type = 'radio' name = 'radio42' value = 'I dont know'>I don't know</label><br>";
+				op = op+"<label><input type = 'radio' name = 'radio42' value = 'I dont want to answer'>I don't want to answer</label>";
+				document.getElementById("answer").innerHTML = op;
+				return;
+			}
+			if(nextQueIndex == 84){
+				document.getElementById("qNumber").innerHTML = (qNumber[nextQueIndex]);
+				document.getElementById("question").innerHTML = (questions[nextQueIndex]);
+				var op = "<label>Cartridges used a year<br></label>";
+				op = op+"<input type = 'text' id = 'text84a' ><br>";
+				op = op+"<label>Cartridges stored in the average business<br></label>";
+				op = op+"<input type = 'text' id = 'text84b' ><br>";
+				op = op+"<label>Toners used a year<br></label>";
+				op = op+"<input type = 'text' id = 'text84c' ><br>";
+				op = op+"<label>Toners stored in the average business<br></label>";
+				op = op+"<input type = 'text' id = 'text84d' ><br>";
+				document.getElementById("answer").innerHTML = op;
+				return;
+			}
+			if (mainQ.indexOf(nextQueIndex) != -1){
+				subQues(nextQueIndex+1, subQ[mainQ.indexOf(nextQueIndex)], nextQueIndex, typeQ[mainQ.indexOf(nextQueIndex)]);
+			} else {
+				document.getElementById("qNumber").innerHTML = (qNumber[nextQueIndex]);
+				document.getElementById("question").innerHTML = (questions[nextQueIndex]);
+				document.getElementById("answer").innerHTML = (answers[nextQueIndex]);
+			}
+			if(ans[queNum] != '0'){
+				var ans = ans[queNum];
+				ans = ans.replace(/#/g,",");
+				document.querySelector('input[value="'+ans+'"]').checked = true;
+			}	
+		}
+		document.getElementById('pause').onclick = function(){
+			var resultData = readCookie('greenCoders');
+			var xhr = new XMLHttpRequest();
+			var url = 'pauseAnswering';
+			xhr.open('POST', url, true);
+			xhr.setRequestHeader('Content-Type', 'application/json');
+			xhr.onreadystatechange = function(){
+				if(xhr.readyState === 4 && xhr.status === 200){
+					var json = JSON.parse(xhr.responseText);
+					alert(json.status + " -- " + json.saveId);
+				}
+				var data = JSON.stringify({"answers":resultData});
+				xhr.send(data);
+			};
+		}
+		function subQues(start, end, main, type){
+			var opt1 = "Yes";
+			var opt2 = "No";
+			var opt3 = "I dont know";
+			if (type == "used"){
+				opt1 = "Used";
+				opt2 = "Not used functional";
+				opt3 = "Neither used nor functional";
+			}
+			document.getElementById('qNumber').innerHTML = main;
+			document.getElementById('question').innerHTML = questions[main];
+			var drawElements = '<table><tr><td>&nbsp;</td><td align = center>'+opt1+'</td><td align = center>'+opt2+'</td><td align = center>'+opt3+'</td></tr>';
+			for(var i = start; i < end; i++){
+				drawElements = drawElements + "<tr><td>"+questions[i]+"</td>";
+				drawElements = drawElements + "<td align = 'center'><input type = 'radio' name = 'radio"+i+"' value = '"+opt1+"'></td>";
+				drawElements = drawElements + "<td align = 'center'><input type = 'radio' name = 'radio"+i+"' value = '"+opt2+"'></td>";
+				drawElements = drawElements + "<td align = 'center'><input type = 'radio' name = 'radio"+i+"' value = '"+opt3+"'></td>";
+				drawElements = drawElements + "</tr>";
+			}
+			drawElements = drawElements + '</table>';
+			document.getElementById('answer').innerHTML = drawElements;
+			return;
+		}
+		function dealWithData(data){
+			var formElement = '';
+			qType.push('0');
+			qNumber.push('0');
+			questions.push('0');
+			answers.push('0');
+			for(var i = 1; i <= Object.keys(data).length; i++){
+				var queNo = 'q'+i;
+				var questionInfo = (data[queNo])
+				var formElement = createFormElement(questionInfo['t'], questionInfo['c'], questionInfo['n']);
+				question = questionInfo['q'];
+				qType.push(questionInfo['t']);
+				qNumber.push(questionInfo['n']);
+				questions.push(question);
+				answers.push(formElement);
+			}
+			var url = new URL(window.location.href);
+			var c = url.searchParams.get("continue");
+			if(c == null){
+				getNextQuestion(0);
+			}
+		}
+		function createFormElement(type, choice, number){
+			var formElement = "";
+			if(type == "single"){
+				for(var i = 0; i < choice.length; i++){
+					formElement = formElement + "<label><input type = 'radio' name = 'radio"+number+"' value = '"+choice[i]+"' required>"+choice[i]+"</label><br>";
+				}
+			}else if(type == "single#text"){
+				for(var i = 0; i < choice.length; i++){
+					formElement = formElement + "<label><input type = 'radio' name = 'radio"+number+"' value = '"+choice[i]+"' required>"+choice[i]+"</label><br>";
+				}
+				formElement = formElement + "<input type = 'text' id = 'text"+number+"' required><br>";
+			}else if(type == "text"){
+				formElement = formElement + "<input type = 'text' id = 'text"+number+"' required><br>";
+			}else if(type == "yni"){
+				formElement = formElement + "<label><input type = 'radio' name = 'radio"+number+"' value = 'yes'>Yes</label><br><label><input type = 'radio' name = 'radio"+number+"' value = 'no'>No</label><br><label><input type = 'radio' name = 'radio"+number+"' value = 'I dont know'>I don't know</label><br>";
+			}
+			return formElement;
+		}
+			</script>
+		</html>						
